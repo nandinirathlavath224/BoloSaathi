@@ -1,0 +1,311 @@
+/* ==========================================
+   BOLOSAATHI - PREMIUM VOICE ASSISTANT
+========================================== */
+
+/* VOICE ASSISTANT PAGE BACKGROUND */
+
+.main-content:has(.voice-container) {
+    background:
+        radial-gradient(circle at 10% 15%, #e9ddff 0%, transparent 32%),
+        radial-gradient(circle at 90% 80%, #dce8ff 0%, transparent 35%),
+        linear-gradient(135deg, #f5f0ff, #f7f8ff);
+
+    min-height: calc(100vh - 86px);
+}
+
+/* TOP NAVBAR */
+
+.main-content:has(.voice-container) .topbar {
+    background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid #e9e3fa;
+    backdrop-filter: blur(15px);
+}
+
+/* MAIN VOICE CARD */
+
+.voice-container {
+    background: linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #faf7ff 55%,
+        #f0f3ff 100%
+    );
+
+    padding: 55px 45px;
+
+    border-radius: 25px;
+
+    text-align: center;
+
+    margin: 28px;
+
+    min-height: 430px;
+
+    border: 1px solid rgba(255, 255, 255, 0.9);
+
+    box-shadow:
+        0 15px 45px rgba(89, 63, 165, 0.09),
+        0 3px 10px rgba(89, 63, 165, 0.04);
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition: all 0.3s ease;
+}
+
+/* DECORATIVE BACKGROUND CIRCLES */
+
+.voice-container::before {
+    content: "";
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    top: -160px;
+    left: -100px;
+
+    background: rgba(150, 119, 255, 0.10);
+
+    border-radius: 50%;
+}
+
+.voice-container::after {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    bottom: -210px;
+    right: -100px;
+
+    background: rgba(89, 144, 255, 0.09);
+
+    border-radius: 50%;
+}
+
+/* CARD CONTENT */
+
+.voice-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* HEADING */
+
+.voice-container h2 {
+    color: #49318f;
+
+    font-size: 29px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.8px;
+
+    margin-bottom: 24px;
+}
+
+/* LANGUAGE LABEL / TEXT */
+
+.voice-container label,
+.voice-container p {
+    color: #77718f;
+}
+
+/* LANGUAGE SELECTOR */
+
+.voice-container select {
+    padding: 13px 20px;
+
+    border-radius: 12px;
+
+    border: 1px solid #e3dafb;
+
+    background: #ffffff;
+
+    margin: 15px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #55418e;
+
+    outline: none;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 12px rgba(89, 63, 165, 0.05);
+
+    transition: 0.25s;
+}
+
+.voice-container select:focus {
+    border-color: #8969ed;
+
+    box-shadow:
+        0 0 0 4px rgba(118, 85, 237, 0.12);
+}
+
+/* AI MESSAGE */
+
+.voice-container .voice-message {
+    background: linear-gradient(
+        120deg,
+        #f0eaff,
+        #edf1ff
+    );
+
+    padding: 22px;
+
+    border-radius: 16px;
+
+    margin: 30px auto;
+
+    color: #47318e;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    line-height: 1.7;
+
+    max-width: 650px;
+
+    border: 1px solid #e8defd;
+
+    box-shadow: 0 7px 20px rgba(89, 63, 165, 0.05);
+}
+
+/* MICROPHONE BUTTON */
+
+.voice-container .mic-button {
+    background: linear-gradient(
+        120deg,
+        #8057ee,
+        #536cf0
+    );
+
+    color: white;
+
+    padding: 16px 34px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 9px 22px rgba(104, 77, 221, 0.28);
+
+    transition: all 0.3s ease;
+}
+
+.voice-container .mic-button:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 14px 28px rgba(104, 77, 221, 0.35);
+}
+
+.voice-container .mic-button:active {
+    transform: scale(0.97);
+}
+
+/* RESPONSIVE DESIGN */
+
+@media (max-width: 650px) {
+
+    .voice-container {
+        margin: 16px;
+        padding: 40px 20px;
+        min-height: 380px;
+    }
+
+    .voice-container h2 {
+        font-size: 23px;
+    }
+
+    .voice-container .voice-message {
+        font-size: 14px;
+        padding: 17px;
+    }
+
+    .voice-container .mic-button {
+        padding: 14px 25px;
+        font-size: 13px;
+    }
+
+}
+
+/* ==========================================
+   PREMIUM DARK MODE
+========================================== */
+
+:root[data-theme="dark"] .main-content:has(.voice-container) {
+    background:
+        radial-gradient(circle at 10% 15%, #32234e 0%, transparent 35%),
+        radial-gradient(circle at 90% 85%, #202c50 0%, transparent 35%),
+        #11121d;
+}
+
+:root[data-theme="dark"] .main-content:has(.voice-container) .topbar {
+    background: rgba(25, 26, 38, 0.94);
+    border-color: #303142;
+}
+
+:root[data-theme="dark"] .voice-container {
+    background: linear-gradient(
+        135deg,
+        #211d36,
+        #282143,
+        #202b46
+    );
+
+    border-color: #393254;
+
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-theme="dark"] .voice-container h2 {
+    color: #d8caff;
+}
+
+:root[data-theme="dark"] .voice-container label,
+:root[data-theme="dark"] .voice-container p {
+    color: #c1b9db;
+}
+
+:root[data-theme="dark"] .voice-container select {
+    background: #302a48;
+    border-color: #51466f;
+    color: #eee8ff;
+}
+
+:root[data-theme="dark"] .voice-container .voice-message {
+    background: linear-gradient(
+        120deg,
+        #34294f,
+        #293452
+    );
+
+    border-color: #51456e;
+    color: #e4d9ff;
+}
+
+:root[data-theme="dark"] .voice-container .mic-button {
+    background: linear-gradient(
+        120deg,
+        #8866f5,
+        #557cf4
+    );
+}
