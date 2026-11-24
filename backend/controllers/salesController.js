@@ -1,34 +1,37 @@
+
 const db = require("../config/db");
 
 // Get all sales
-exports.getSales = (req, res) => {
-    const sql = `
-        SELECT 
-            s.sale_id,
-            s.customer_id,
-            s.total_amount,
-            s.payment_method,
-            s.created_at
-        FROM sales s
-        ORDER BY s.created_at DESC
-    `;
+exports.getSales = async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                s.sale_id,
+                s.customer_id,
+                s.total_amount,
+                s.payment_method,
+                s.created_at
+            FROM sales s
+            ORDER BY s.created_at DESC
+        `;
 
-    db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({
-                success: false,
-                message: "Unable to fetch sales",
-                error: err.message
-            });
-        }
+        const result = await db.query(sql);
 
         res.status(200).json({
             success: true,
-            count: results.length,
-            sales: results
+            count: result.rows.length,
+            sales: result.rows
         });
-    });
+
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Unable to fetch sales",
+            error: err.message
+        });
+    }
 };
+
 
 // Add a new sale
 exports.addSale = async (req, res) => {
@@ -41,34 +44,50 @@ exports.addSale = async (req, res) => {
         });
     }
 
-    const connection = db.promise();
+    let client;
 
     try {
-        await connection.beginTransaction();
+        // Get a PostgreSQL client for the transaction
+        client = await db.connect();
+
+        await client.query("BEGIN");
 
         let totalAmount = 0;
         const saleItems = [];
 
         for (const item of items) {
             const quantity = Number(item.quantity);
+            const productId = Number(item.product_id);
 
             if (!Number.isInteger(quantity) || quantity <= 0) {
-                throw new Error("Product quantity must be a positive whole number.");
+                throw new Error(
+                    "Product quantity must be a positive whole number."
+                );
             }
 
-            const [products] = await connection.execute(
-                "SELECT product_id, product_name, quantity, price FROM products WHERE product_id = ? FOR UPDATE",
-                [item.product_id]
+            if (!Number.isInteger(productId) || productId <= 0) {
+                throw new Error("Invalid product ID.");
+            }
+
+            // Fetch product and lock its row
+            const productResult = await client.query(
+                `SELECT product_id, product_name, quantity, price
+                 FROM products
+                 WHERE product_id = $1
+                 FOR UPDATE`,
+                [productId]
             );
 
-            if (products.length === 0) {
-                throw new Error(`Product ${item.product_id} was not found.`);
+            if (productResult.rows.length === 0) {
+                throw new Error(`Product ${productId} was not found.`);
             }
 
-            const product = products[0];
+            const product = productResult.rows[0];
 
-            if (product.quantity < quantity) {
-                throw new Error(`Insufficient stock for ${product.product_name}.`);
+            if (Number(product.quantity) < quantity) {
+                throw new Error(
+                    `Insufficient stock for ${product.product_name}.`
+                );
             }
 
             const price = Number(product.price);
@@ -82,27 +101,47 @@ exports.addSale = async (req, res) => {
                 price
             });
 
-            await connection.execute(
-                "UPDATE products SET quantity = quantity - ? WHERE product_id = ?",
+            // Reduce product stock
+            await client.query(
+                `UPDATE products
+                 SET quantity = quantity - $1
+                 WHERE product_id = $2`,
                 [quantity, product.product_id]
             );
         }
 
-        const [saleResult] = await connection.execute(
-            "INSERT INTO sales (customer_id, total_amount, payment_method) VALUES (?, ?, ?)",
-            [customer_id || null, totalAmount, payment_method || "Cash"]
+        // Insert sale and retrieve generated sale ID
+        const saleResult = await client.query(
+            `INSERT INTO sales
+             (customer_id, total_amount, payment_method)
+             VALUES ($1, $2, $3)
+             RETURNING sale_id`,
+            [
+                customer_id || null,
+                totalAmount,
+                payment_method || "Cash"
+            ]
         );
 
-        const saleId = saleResult.insertId;
+        const saleId = saleResult.rows[0].sale_id;
 
+        // Insert individual sale items
         for (const item of saleItems) {
-            await connection.execute(
-                "INSERT INTO sale_items (sale_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
-                [saleId, item.product_id, item.quantity, item.price]
+            await client.query(
+                `INSERT INTO sale_items
+                 (sale_id, product_id, quantity, price)
+                 VALUES ($1, $2, $3, $4)`,
+                [
+                    saleId,
+                    item.product_id,
+                    item.quantity,
+                    item.price
+                ]
             );
         }
 
-        await connection.commit();
+        // Commit transaction
+        await client.query("COMMIT");
 
         res.status(201).json({
             success: true,
@@ -112,7 +151,13 @@ exports.addSale = async (req, res) => {
         });
 
     } catch (error) {
-        await connection.rollback();
+        if (client) {
+            try {
+                await client.query("ROLLBACK");
+            } catch (rollbackError) {
+                console.error("Rollback Error:", rollbackError.message);
+            }
+        }
 
         res.status(400).json({
             success: false,
@@ -120,6 +165,8 @@ exports.addSale = async (req, res) => {
         });
 
     } finally {
-       
+        if (client) {
+            client.release();
+        }
     }
 };

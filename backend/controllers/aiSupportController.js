@@ -1,6 +1,6 @@
-
 // ==========================================
 // BOLOSAATHI - GEMINI AI SUPPORT CONTROLLER
+// PostgreSQL Version
 // ==========================================
 
 const db = require("../config/db");
@@ -9,16 +9,9 @@ const db = require("../config/db");
 // DATABASE QUERY HELPER
 // ==========================================
 
-const queryDatabase = (sql, values = []) => {
-    return new Promise((resolve, reject) => {
-        db.query(sql, values, (error, results) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(results);
-            }
-        });
-    });
+const queryDatabase = async (sql, values = []) => {
+    const result = await db.query(sql, values);
+    return result.rows;
 };
 
 // ==========================================
@@ -39,12 +32,10 @@ const generateSolutionForRequest = async (requestId) => {
             `Generating Gemini AI solution for Request #${requestId}`
         );
 
-        // Check API key
         if (!process.env.GEMINI_API_KEY) {
-            throw new Error("Gemini API key is missing in the .env file.");
+            throw new Error("Gemini API key is missing.");
         }
 
-        // Import Gemini SDK
         const { GoogleGenAI } = await import("@google/genai");
 
         const ai = new GoogleGenAI({
@@ -55,7 +46,7 @@ const generateSolutionForRequest = async (requestId) => {
         const requests = await queryDatabase(
             `SELECT request_id, name, email, subject, message
              FROM support_requests
-             WHERE request_id = ?`,
+             WHERE request_id = $1`,
             [requestId]
         );
 
@@ -66,7 +57,7 @@ const generateSolutionForRequest = async (requestId) => {
         const request = requests[0];
 
         // ==========================================
-        // SHORT AND FRIENDLY AI PROMPT
+        // AI PROMPT
         // ==========================================
 
         const prompt = `
@@ -95,7 +86,6 @@ IMPORTANT LANGUAGE INFORMATION:
 - Never tell users that the complete application interface can be translated.
 - Never invent settings, buttons, or features.
 
-
 YOUR RESPONSE RULES:
 1. Keep the solution very short and sweet.
 2. Use simple, friendly English.
@@ -105,6 +95,7 @@ YOUR RESPONSE RULES:
 6. Never invent features or buttons.
 7. Only suggest actions available in BoloSaathi.
 8. Make the customer feel happy and supported.
+
 SUPPORT REQUEST:
 
 Customer Name: ${request.name}
@@ -190,13 +181,13 @@ the customer's problem.
         const finalSolution = solution.trim();
 
         // ==========================================
-        // SAVE SOLUTION IN MYSQL DATABASE
+        // SAVE SOLUTION IN POSTGRESQL
         // ==========================================
 
         await queryDatabase(
             `UPDATE support_requests
-             SET solution = ?
-             WHERE request_id = ?`,
+             SET solution = $1
+             WHERE request_id = $2`,
             [finalSolution, requestId]
         );
 
@@ -225,7 +216,7 @@ const regenerateSolutionForRequest = async (requestId) => {
         const requests = await queryDatabase(
             `SELECT request_id
              FROM support_requests
-             WHERE request_id = ?`,
+             WHERE request_id = $1`,
             [requestId]
         );
 
