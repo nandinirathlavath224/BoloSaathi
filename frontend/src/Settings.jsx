@@ -25,6 +25,12 @@ function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", value);
   document.documentElement.style.colorScheme = value;
 }
+const Field = ({ label, children, full = false }) => (
+  <div className={`settings-field ${full ? "full-width" : ""}`}>
+    <label>{label}</label>
+    {children}
+  </div>
+);
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("Business Profile");
@@ -88,9 +94,14 @@ function Settings() {
     window.clearTimeout(notify.timer);
     notify.timer = window.setTimeout(() => setMessage(""), 3500);
   };
+const changeProfile = (e) => {
+    console.log("Typing:", e.target.name, e.target.value);
 
-  const changeProfile = (e) =>
-    setProfile((old) => ({ ...old, [e.target.name]: e.target.value }));
+    setProfile((old) => ({
+        ...old,
+        [e.target.name]: e.target.value
+    }));
+};
 
   const changePreferences = (e) => {
     const { name, value } = e.target;
@@ -175,11 +186,7 @@ function Settings() {
     notify("Team member added. Click Save Changes to keep it.");
   };
 
-  const Field = ({ label, children, full = false }) => (
-    <div className={`settings-field ${full ? "full-width" : ""}`}>
-      <label>{label}</label>{children}
-    </div>
-  );
+  
 
   const Toggle = ({ name, title, description, value, onChange }) => (
     <div className="notification-setting">
@@ -196,7 +203,14 @@ function Settings() {
       <h2>Business Profile</h2><p>Manage your business information.</p>
       <div className="settings-form-grid">
         <Field label={<><Store size={16} /> Business Name</>}>
-          <input name="businessName" value={profile.businessName} onChange={changeProfile} placeholder="Enter business name" />
+          <input 
+    name="businessName"
+    value={profile.businessName}
+    onChange={changeProfile}
+    onBlur={() => console.log("Business Name lost focus")}
+    onFocus={() => console.log("Business Name focused")}
+    placeholder="Enter business name"
+/>
         </Field>
         <Field label={<><User size={16} /> Owner Name</>}>
           <input name="ownerName" value={profile.ownerName} onChange={changeProfile} placeholder="Enter owner name" />

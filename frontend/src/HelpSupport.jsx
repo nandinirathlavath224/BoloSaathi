@@ -18,6 +18,7 @@ import {
     Mail,
     Headphones
 } from "lucide-react";
+import { API_URL } from "./api";
 
 import "./HelpSupport.css";
 
@@ -95,7 +96,7 @@ function HelpSupport() {
         setLoading(true);
 
         try {
-            const response = await fetch("http://localhost:5000/api/support", {
+            const response = await fetch(`${API_URL}/support`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

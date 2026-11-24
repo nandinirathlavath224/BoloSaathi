@@ -10,10 +10,11 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
+import { API_URL } from "./api";
 
 import "./Sales.css";
 
-const API_URL = "http://localhost:5000/api";
+
 
 function Sales() {
   const [products, setProducts] = useState([]);

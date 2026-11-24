@@ -1,4 +1,11 @@
-const API_URL = "http://localhost:5000/api";
+// ==========================================
+// BOLOSAATHI - API CONFIGURATION
+// ==========================================
+
+export const API_URL = (
+    import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
 
 // ==========================================
 // FETCH DASHBOARD STATISTICS
@@ -49,56 +56,32 @@ export const getRecentTransactions = async () => {
 // ==========================================
 
 export const getBusinessSummary = async () => {
-
     try {
-
         const data = await getDashboardStats();
 
         const stats = data.dashboard || {};
 
         const totalSales = Number(stats.totalSales || 0);
-
         const totalExpenses = Number(stats.totalExpenses || 0);
 
         const todaySales = Number(stats.todaySales || 0);
-
         const todayExpenses = Number(stats.todayExpenses || 0);
 
-
         return {
-
-            // Overall business details
-
-            totalSales: totalSales,
-
-            totalExpenses: totalExpenses,
-
+            totalSales,
+            totalExpenses,
             netProfit: totalSales - totalExpenses,
 
-
-            // Today's business details
-
-            todaySales: todaySales,
-
-            todayExpenses: todayExpenses,
-
+            todaySales,
+            todayExpenses,
             todayProfit: todaySales - todayExpenses,
 
-            
-            // Inventory details
-
             totalProducts: Number(stats.totalProducts || 0),
-
             lowStockCount: Number(stats.lowStockCount || 0)
-
         };
 
     } catch (error) {
-
         console.error("Business Summary API Error:", error);
-
         throw error;
-
     }
-
 };

@@ -22,10 +22,11 @@ import {
     RefreshCw,
     BarChart3
 } from "lucide-react";
+import { API_URL } from "./api";
 
 import "./Reports.css";
 
-const API_URL = "http://localhost:5000/api";
+
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {

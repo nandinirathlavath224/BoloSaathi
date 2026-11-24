@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./VoiceAssistant.css";
-import { getBusinessSummary } from "./api";
+import { API_URL, getBusinessSummary } from "./api";
 
 function VoiceAssistant() {
 
@@ -279,7 +279,7 @@ function VoiceAssistant() {
     const generateAIResponse = async (text) => {
 
         const response = await fetch(
-            "http://localhost:5000/api/ai/chat",
+    `${API_URL}/ai/chat`,
             {
                 method: "POST",
 

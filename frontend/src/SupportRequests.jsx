@@ -19,6 +19,7 @@ import {
     X
 } from "lucide-react";
 
+import { API_URL } from "./api";
 import "./SupportRequests.css";
 
 function SupportRequests() {
@@ -38,17 +39,21 @@ function SupportRequests() {
             if (showLoader) setLoading(true);
             setError("");
 
-            const response = await fetch("http://localhost:5000/api/support");
+            const response = await fetch(`${API_URL}/support`);
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.message || "Unable to load support requests.");
+                throw new Error(
+                    data.message || "Unable to load support requests."
+                );
             }
 
             setRequests(data.requests || []);
+
         } catch (err) {
             console.error("Support Requests Error:", err);
             setError(err.message || "Unable to connect to the server.");
+
         } finally {
             if (showLoader) setLoading(false);
         }
@@ -72,18 +77,24 @@ function SupportRequests() {
             setError("");
 
             const response = await fetch(
-                `http://localhost:5000/api/support/${requestId}`,
+                `${API_URL}/support/${requestId}`,
                 {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ status: newStatus })
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
                 }
             );
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.message || "Unable to update status.");
+                throw new Error(
+                    data.message || "Unable to update status."
+                );
             }
 
             setRequests(previous =>
@@ -93,8 +104,11 @@ function SupportRequests() {
                         : request
                 )
             );
+
         } catch (err) {
+            console.error("Status Update Error:", err);
             setError(err.message || "Status update failed.");
+
         } finally {
             setUpdatingId(null);
         }
@@ -107,17 +121,21 @@ function SupportRequests() {
             setError("");
 
             const response = await fetch(
-                `http://localhost:5000/api/support/${requestId}/regenerate`,
+                `${API_URL}/support/${requestId}/regenerate`,
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" }
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
                 }
             );
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.message || "Unable to regenerate AI solution.");
+                throw new Error(
+                    data.message || "Unable to regenerate AI solution."
+                );
             }
 
             setRequests(previous =>
@@ -131,9 +149,13 @@ function SupportRequests() {
                         : request
                 )
             );
+
         } catch (err) {
             console.error("AI Regeneration Error:", err);
-            setError(err.message || "AI solution regeneration failed.");
+            setError(
+                err.message || "AI solution regeneration failed."
+            );
+
         } finally {
             setRegeneratingId(null);
         }
@@ -152,20 +174,25 @@ function SupportRequests() {
             setError("");
 
             const response = await fetch(
-                `http://localhost:5000/api/support/${requestId}`,
-                { method: "DELETE" }
+                `${API_URL}/support/${requestId}`,
+                {
+                    method: "DELETE"
+                }
             );
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.message || "Unable to delete the support issue.");
+                throw new Error(
+                    data.message || "Unable to delete the support issue."
+                );
             }
 
-            // Remove only the deleted issue from the visible list.
+            // REMOVE THE DELETED ISSUE FROM THE LIST
             setRequests(previous =>
                 previous.filter(
-                    request => Number(request.request_id) !== Number(requestId)
+                    request =>
+                        Number(request.request_id) !== Number(requestId)
                 )
             );
 
@@ -173,9 +200,13 @@ function SupportRequests() {
                 setEditingId(null);
                 setEditedSolution("");
             }
+
         } catch (err) {
             console.error("Delete Support Request Error:", err);
-            setError(err.message || "Unable to delete support issue.");
+            setError(
+                err.message || "Unable to delete support issue."
+            );
+
         } finally {
             setDeletingRequestId(null);
         }
@@ -206,33 +237,44 @@ function SupportRequests() {
             setError("");
 
             const response = await fetch(
-                `http://localhost:5000/api/support/${requestId}/solution`,
+                `${API_URL}/support/${requestId}/solution`,
                 {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ solution: editedSolution.trim() })
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        solution: editedSolution.trim()
+                    })
                 }
             );
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.message || "Unable to save the solution.");
+                throw new Error(
+                    data.message || "Unable to save the solution."
+                );
             }
 
             setRequests(previous =>
                 previous.map(request =>
                     Number(request.request_id) === Number(requestId)
-                        ? { ...request, solution: editedSolution.trim() }
+                        ? {
+                            ...request,
+                            solution: editedSolution.trim()
+                        }
                         : request
                 )
             );
 
             setEditingId(null);
             setEditedSolution("");
+
         } catch (err) {
             console.error("Save Solution Error:", err);
             setError(err.message || "Unable to save solution.");
+
         } finally {
             setSavingSolutionId(null);
         }
@@ -253,11 +295,14 @@ function SupportRequests() {
 
     // FORMAT DATE
     const formatDate = (date) => {
-        return date ? new Date(date).toLocaleString("en-IN") : "Date unavailable";
+        return date
+            ? new Date(date).toLocaleString("en-IN")
+            : "Date unavailable";
     };
 
     return (
         <div className="support-management-page">
+
             {/* HEADER */}
             <div className="support-management-header">
                 <div>
@@ -265,7 +310,9 @@ function SupportRequests() {
                         <Headphones size={15} />
                         SUPPORT MANAGEMENT
                     </span>
+
                     <h1>Support Requests</h1>
+
                     <p>
                         Manage customer issues with intelligent AI-generated solutions.
                     </p>
@@ -283,6 +330,7 @@ function SupportRequests() {
 
             {/* STATISTICS */}
             <div className="support-stats-grid">
+
                 <div className="support-stat-card">
                     <div className="support-stat-icon total">
                         <MessageSquare size={23} />
@@ -314,10 +362,12 @@ function SupportRequests() {
                     <p>Resolved</p>
                     <h2>{resolvedCount}</h2>
                 </div>
+
             </div>
 
             {/* CUSTOMER REQUESTS */}
             <div className="support-requests-container">
+
                 <div className="support-requests-title">
                     <div>
                         <h2>Customer Issues</h2>
@@ -325,6 +375,7 @@ function SupportRequests() {
                             Customer problems and AI-powered support solutions.
                         </p>
                     </div>
+
                     <span>{requests.length} Requests</span>
                 </div>
 
@@ -343,21 +394,29 @@ function SupportRequests() {
                     <div className="support-management-empty">
                         <MessageSquare size={40} />
                         <h3>No support requests yet</h3>
-                        <p>Submitted customer issues will appear here.</p>
+                        <p>
+                            Submitted customer issues will appear here.
+                        </p>
                     </div>
                 ) : (
+
                     <div className="support-request-list">
+
                         {requests.map(request => (
+
                             <div
                                 className="support-request-card"
                                 key={request.request_id}
                             >
+
                                 {/* REQUEST HEADER */}
                                 <div className="support-request-top">
+
                                     <div className="support-request-heading">
                                         <div className="support-request-icon">
                                             <MessageSquare size={22} />
                                         </div>
+
                                         <div>
                                             <h3>{request.subject}</h3>
                                             <span>
@@ -373,57 +432,75 @@ function SupportRequests() {
                                     >
                                         {request.status || "Pending"}
                                     </span>
+
                                 </div>
 
                                 {/* CUSTOMER INFORMATION */}
                                 <div className="support-request-details">
+
                                     <div>
                                         <User size={17} />
                                         <span>{request.name}</span>
                                     </div>
+
                                     <div>
                                         <Mail size={17} />
                                         <span>{request.email}</span>
                                     </div>
+
                                     <div>
                                         <Calendar size={17} />
-                                        <span>{formatDate(request.created_at)}</span>
+                                        <span>
+                                            {formatDate(request.created_at)}
+                                        </span>
                                     </div>
+
                                 </div>
 
                                 {/* CUSTOMER ISSUE */}
                                 <div className="support-request-message">
+
                                     <strong>
                                         <FileText size={17} />
                                         Customer Issue
                                     </strong>
+
                                     <p>{request.message}</p>
+
                                 </div>
 
                                 {/* AI SOLUTION */}
                                 <div className="support-ai-solution">
+
                                     <div className="support-ai-heading">
+
                                         <div className="support-ai-title">
+
                                             <div className="support-ai-icon">
                                                 <Bot size={22} />
                                             </div>
+
                                             <div>
                                                 <h3>AI-Generated Solution</h3>
                                                 <span>
                                                     Powered by BoloSaathi AI
                                                 </span>
                                             </div>
+
                                         </div>
 
                                         <span className="support-ai-badge">
                                             <Sparkles size={14} />
                                             AI POWERED
                                         </span>
+
                                     </div>
 
                                     {/* SOLUTION DISPLAY / EDITOR */}
                                     {editingId === request.request_id ? (
+
                                         <div style={{ marginTop: "15px" }}>
+
                                             <textarea
                                                 value={editedSolution}
                                                 onChange={e =>
@@ -449,6 +526,7 @@ function SupportRequests() {
                                                     marginTop: "12px"
                                                 }}
                                             >
+
                                                 <button
                                                     className="support-refresh-button"
                                                     onClick={() =>
@@ -459,6 +537,7 @@ function SupportRequests() {
                                                     }
                                                 >
                                                     <Save size={16} />
+
                                                     {savingSolutionId === request.request_id
                                                         ? "Saving..."
                                                         : "Save Changes"}
@@ -470,47 +549,62 @@ function SupportRequests() {
                                                     disabled={
                                                         savingSolutionId === request.request_id
                                                     }
-                                                    style={{ background: "#777" }}
+                                                    style={{
+                                                        background: "#777"
+                                                    }}
                                                 >
                                                     <X size={16} />
                                                     Cancel
                                                 </button>
+
                                             </div>
+
                                         </div>
+
                                     ) : request.solution ? (
+
                                         <div className="support-ai-answer">
                                             <p>{request.solution}</p>
                                         </div>
+
                                     ) : (
+
                                         <div className="support-ai-pending">
                                             <AlertCircle size={18} />
+
                                             <div>
                                                 <strong>
                                                     AI solution not available
                                                 </strong>
+
                                                 <p>
                                                     Generate an AI solution or add one manually.
                                                 </p>
                                             </div>
                                         </div>
+
                                     )}
 
                                     {/* EDIT BUTTON */}
                                     {editingId !== request.request_id && (
+
                                         <button
                                             className="support-refresh-button"
                                             onClick={() => startEditing(request)}
                                             style={{ marginTop: "15px" }}
                                         >
                                             <Pencil size={16} />
+
                                             {request.solution
                                                 ? "Edit Solution"
                                                 : "Add Solution"}
                                         </button>
+
                                     )}
 
                                     {/* REGENERATE BUTTON */}
                                     {editingId !== request.request_id && (
+
                                         <button
                                             className="support-refresh-button"
                                             onClick={() =>
@@ -533,22 +627,31 @@ function SupportRequests() {
                                                             : "none"
                                                 }}
                                             />
+
                                             {regeneratingId === request.request_id
                                                 ? "Generating Solution..."
                                                 : request.solution
                                                     ? "Regenerate AI Solution"
                                                     : "Generate AI Solution"}
+
                                         </button>
+
                                     )}
+
                                 </div>
 
                                 {/* STATUS MANAGEMENT */}
                                 <div className="support-request-footer">
-                                    <label>Update Request Status</label>
+
+                                    <label>
+                                        Update Request Status
+                                    </label>
 
                                     <select
                                         value={request.status || "Pending"}
-                                        disabled={updatingId === request.request_id}
+                                        disabled={
+                                            updatingId === request.request_id
+                                        }
                                         onChange={e =>
                                             updateStatus(
                                                 request.request_id,
@@ -556,14 +659,24 @@ function SupportRequests() {
                                             )
                                         }
                                     >
-                                        <option value="Pending">Pending</option>
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="Resolved">Resolved</option>
+                                        <option value="Pending">
+                                            Pending
+                                        </option>
+
+                                        <option value="In Progress">
+                                            In Progress
+                                        </option>
+
+                                        <option value="Resolved">
+                                            Resolved
+                                        </option>
+
                                     </select>
 
                                     {updatingId === request.request_id && (
                                         <span>Updating...</span>
                                     )}
+
                                 </div>
 
                                 {/* DELETE ENTIRE ISSUE */}
@@ -575,6 +688,7 @@ function SupportRequests() {
                                         marginTop: "16px"
                                     }}
                                 >
+
                                     <button
                                         type="button"
                                         className="support-delete-solution"
@@ -590,16 +704,25 @@ function SupportRequests() {
                                         title="Permanently delete this entire support issue"
                                     >
                                         <Trash2 size={16} />
+
                                         {deletingRequestId === request.request_id
                                             ? "Deleting Issue..."
                                             : "Delete Issue"}
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                         ))}
+
                     </div>
+
                 )}
+
             </div>
+
         </div>
     );
 }

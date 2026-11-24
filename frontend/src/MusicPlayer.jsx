@@ -15,6 +15,7 @@ import {
     Heart,
     Sparkles
 } from "lucide-react";
+import { API_URL } from "./api";
 
 import "./MusicPlayer.css";
 
@@ -49,11 +50,9 @@ function MusicPlayer({ onClose }) {
     // =====================================
 
     const fetchSongs = async (searchText) => {
-
-        const response = await fetch(
-            `http://localhost:5000/api/music/search?query=${encodeURIComponent(searchText)}`
-        );
-
+const response = await fetch(
+    `${API_URL}/music/search?query=${encodeURIComponent(searchText)}`
+);
         const data = await response.json();
 
         if (!response.ok || !data.success) {

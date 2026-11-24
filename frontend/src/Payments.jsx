@@ -8,10 +8,11 @@ import {
   Clock,
   CreditCard
 } from "lucide-react";
+import { API_URL } from "./api";
 
 import "./Payments.css";
 
-const API_URL = "http://localhost:5000/api";
+
 
 function Payments() {
   const [payments, setPayments] = useState([]);
